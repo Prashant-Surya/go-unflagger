@@ -57,7 +57,7 @@ func(flagger *Flagger) elseImplementation(updatedList *[]ast.Stmt, elseBlock ast
 	}
 }
 
-func(flagger *Flagger) CheckForFlag(function *ast.FuncDecl) *ast.FuncDecl{
+func(flagger *Flagger) CheckForFlag(function *ast.FuncDecl) (unFlagged bool){
 	body := function.Body.List
 	var updatedList []ast.Stmt
 	for _, stmt := range body {
@@ -73,6 +73,7 @@ func(flagger *Flagger) CheckForFlag(function *ast.FuncDecl) *ast.FuncDecl{
 			}
 
 			if flag {
+				unFlagged = true
 				if ifImplementation {
 					for _, item := range stmtType.Body.List {
 						updatedList = append(updatedList, item)
@@ -88,5 +89,6 @@ func(flagger *Flagger) CheckForFlag(function *ast.FuncDecl) *ast.FuncDecl{
 		}
 	}
 	function.Body.List = updatedList
-	return function
+
+	return
 }

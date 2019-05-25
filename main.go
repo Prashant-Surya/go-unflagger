@@ -24,14 +24,17 @@ func processFile(path string, dateFormat string) {
 		log.Fatal(err)
 	}
 	flaggerObj := &flagger.Flagger{}
+	var unFlagged = false
 	for _, funcName := range f.Decls {
 		switch funcD := funcName.(type) {
 		case *ast.FuncDecl:
-			flaggerObj.CheckForFlag(funcD)
+			unFlagged = flaggerObj.CheckForFlag(funcD)
 		}
 	}
 
-	printer.Fprint(os.Stdout, token.NewFileSet(), f)
+	if unFlagged {
+		printer.Fprint(os.Stdout, token.NewFileSet(), f)
+	}
 }
 
 func main() {
