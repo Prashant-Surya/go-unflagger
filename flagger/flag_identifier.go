@@ -16,8 +16,6 @@ func(flagger *Flagger) isFlag(condition ast.Expr) bool {
 	var conditions []string
 	for !breakLoop {
 		switch tempType := temp.(type) {
-		case *ast.BinaryExpr:
-
 		case *ast.SelectorExpr:
 			conditions = append(conditions, fmt.Sprint(tempType.Sel))
 			temp = tempType.X
