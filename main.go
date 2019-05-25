@@ -33,6 +33,12 @@ func processFile(path string, dateFormat string) {
 	}
 
 	if unFlagged {
+		//var buf bytes.Buffer
+		//printer.Fprint(&buf, token.NewFileSet(), f)
+		//fileErr := ioutil.WriteFile(path, buf.Bytes(), 0644)
+		//if fileErr != nil {
+		//	panic(fileErr)
+		//}
 		printer.Fprint(os.Stdout, token.NewFileSet(), f)
 	}
 }
