@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"flagger/flagger"
 	"go/printer"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +16,7 @@ import (
 	"log"
 )
 
-func processFile(path string, dateFormat string) {
+func processFile(path string, flaggerObj flagger.FlaggerInterface, writeToFile bool) {
 	if !strings.HasSuffix(path, ".go") {
 		return
 	}
@@ -23,7 +25,6 @@ func processFile(path string, dateFormat string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	flaggerObj := &flagger.Flagger{}
 	var unFlagged = false
 	for _, funcName := range f.Decls {
 		switch funcD := funcName.(type) {
@@ -33,28 +34,42 @@ func processFile(path string, dateFormat string) {
 	}
 
 	if unFlagged {
-		//var buf bytes.Buffer
-		//printer.Fprint(&buf, token.NewFileSet(), f)
-		//fileErr := ioutil.WriteFile(path, buf.Bytes(), 0644)
-		//if fileErr != nil {
-		//	panic(fileErr)
-		//}
-		printer.Fprint(os.Stdout, token.NewFileSet(), f)
+		if writeToFile {
+			var buf bytes.Buffer
+			printer.Fprint(&buf, token.NewFileSet(), f)
+			fileErr := ioutil.WriteFile(path, buf.Bytes(), 0644)
+			if fileErr != nil {
+				panic(fileErr)
+			}
+		} else {
+			printer.Fprint(os.Stdout, token.NewFileSet(), f)
+		}
+	}
+}
+
+func validations(flaggerType, dateFormat, flagName, path *string, recursive *bool) {
+	if *flaggerType != flagger.NAME && *flaggerType != flagger.DATE {
+		panic("Invalid flaggerType specified choose name or date")
+	}
+	if *flaggerType == flagger.NAME && *flagName == "" {
+		panic("Name flagger is selected but flag name was not specified")
+	}
+	if *path == "" {
+		panic("Path is mandatory")
 	}
 }
 
 func main() {
 	// Commandline Flags initialization
 	recursive := flag.Bool("recursive", false, "Recursively parse flags")
-	dateFormat := flag.String("date-format", "2008_01_01", "Format of the date embedded in flag")
-
+	flaggerType := flag.String("type", "date", "Flagger Type. Possible values date, name")
+	dateFormat := flag.String("date-format", "2006_01_02", "Format of the date embedded in flag")
+	flagName := flag.String("name", "",  "Name of the flag to be removed")
 	path := flag.String("path", "", "Relative or Absolute Path of the file or folder")
-
+	writeToFile := flag.Bool("write", false, "Enable this flag to update contents to file or it'll be written to stdout")
 	flag.Parse()
 
-	if *path == "" {
-		panic("Path is mandatory")
-	}
+	validations(flaggerType, dateFormat, flagName, path, recursive)
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -70,6 +85,8 @@ func main() {
 	if os.IsNotExist(err) {
 		panic("Path provided does not exist " + filesPath)
 	}
+
+	flaggerObj := flagger.NewFlagger(*flaggerType, *flagName, *dateFormat)
 
 	var filesList []string
 	if fi.IsDir()  {
@@ -95,7 +112,7 @@ func main() {
 		filesList = append(filesList, filesPath)
 	}
 	for _, file := range filesList {
-		processFile(file, *dateFormat)
+		processFile(file, flaggerObj, *writeToFile)
 	}
 
 }

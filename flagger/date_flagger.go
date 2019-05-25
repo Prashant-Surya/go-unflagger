@@ -7,10 +7,11 @@ import (
 	"time"
 )
 
-type Flagger struct {
+type DateFlagger struct {
+	DateFormat string
 }
 
-func(flagger *Flagger) isFlag(condition ast.Expr) bool {
+func(flagger *DateFlagger) isFlag(condition ast.Expr) bool {
 	temp := condition
 	breakLoop := false
 	var conditions []string
@@ -39,7 +40,7 @@ func(flagger *Flagger) isFlag(condition ast.Expr) bool {
 		return false
 	}
 
-	date := extractDate(flagsSplit[len(flagsSplit) - 1])
+	date := extractDate(flagger.DateFormat, flagsSplit[len(flagsSplit) - 1])
 	if date != nil {
 		now := time.Now()
 		if now.After(*date) {
@@ -50,14 +51,14 @@ func(flagger *Flagger) isFlag(condition ast.Expr) bool {
 	return false
 }
 
-func(flagger *Flagger) elseImplementation(updatedList *[]ast.Stmt, elseBlock ast.Stmt) {
+func(flagger *DateFlagger) elseImplementation(updatedList *[]ast.Stmt, elseBlock ast.Stmt) {
 	elseStmt := elseBlock.(*ast.BlockStmt)
 	for _, item := range elseStmt.List {
 		*updatedList = append(*updatedList, item)
 	}
 }
 
-func(flagger *Flagger) CheckForFlag(function *ast.FuncDecl) (unFlagged bool){
+func(flagger *DateFlagger) CheckForFlag(function *ast.FuncDecl) (unFlagged bool){
 	body := function.Body.List
 	var updatedList []ast.Stmt
 	for _, stmt := range body {
