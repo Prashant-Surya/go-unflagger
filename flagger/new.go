@@ -1,16 +1,9 @@
 package flagger
 
-import "go/ast"
-
 const (
 	DATE = "date"
 	NAME = "name"
 )
-
-type FlaggerInterface interface {
-	CheckForFlag(function *ast.FuncDecl) bool
-	//ValidateCondition(conditions []string) bool
-}
 
 type FlagChecker interface {
 	IsValidFlag(conditions []string) bool
