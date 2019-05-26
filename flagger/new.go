@@ -9,19 +9,26 @@ const (
 
 type FlaggerInterface interface {
 	CheckForFlag(function *ast.FuncDecl) bool
+	//ValidateCondition(conditions []string) bool
 }
 
-func NewFlagger(flaggerType string, name string, dateFormat string) FlaggerInterface {
+type FlagChecker interface {
+	IsValidFlag(conditions []string) bool
+}
+
+func NewFlagger(flaggerType string, name string, dateFormat string) *CommonFlagger {
+	obj := &CommonFlagger{}
 	switch flaggerType {
 	case DATE:
-		return &DateFlagger{
+		obj.FlagCheckerObj = &DateFlagChecker{
 			DateFormat: dateFormat,
 		}
 	case NAME:
-		return &NameFlagger{
+		obj.FlagCheckerObj = &NameFlagChecker{
 			Name: name,
 		}
 	default:
 		return nil
 	}
+	return obj
 }

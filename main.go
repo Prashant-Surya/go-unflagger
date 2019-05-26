@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"flagger/flagger"
+	"fmt"
 	"go/printer"
 	"io/ioutil"
 	"os"
@@ -20,6 +21,7 @@ func processFile(path string, flaggerObj flagger.FlaggerInterface, writeToFile b
 	if !strings.HasSuffix(path, ".go") {
 		return
 	}
+	fmt.Println("PRINT", path)
 	fs := token.NewFileSet()
 	f, err := parser.ParseFile(fs, path, nil, parser.AllErrors)
 	if err != nil {
