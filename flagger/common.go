@@ -39,9 +39,9 @@ func(flagger *CommonFlagger) elseImplementation(updatedList *[]ast.Stmt, elseBlo
 	}
 }
 
-func(flagger *CommonFlagger) CheckForFlag(function *ast.FuncDecl) (unFlagged bool){
-	body := function.Body.List
+func(flagger *CommonFlagger) RemoveFlag(body []ast.Stmt) (bool, []ast.Stmt){
 	var updatedList []ast.Stmt
+	var unFlagged = false
 	for _, stmt := range body {
 		switch stmtType := stmt.(type) {
 		case *ast.IfStmt:
@@ -64,13 +64,19 @@ func(flagger *CommonFlagger) CheckForFlag(function *ast.FuncDecl) (unFlagged boo
 					flagger.elseImplementation(&updatedList, stmtType.Else)
 				}
 				continue
+			} else {
+				// If there is no flag check in body if it contains flag
+				localFlag, localUpdate := flagger.RemoveFlag(stmtType.Body.List)
+				if localFlag {
+					unFlagged = true
+					stmtType.Body.List = localUpdate
+				}
+				updatedList = append(updatedList, stmt)
 			}
-			updatedList = append(updatedList, stmt)
 		default:
 			updatedList = append(updatedList, stmt)
 		}
 	}
-	function.Body.List = updatedList
 
-	return
+	return unFlagged, updatedList
 }

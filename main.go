@@ -17,7 +17,7 @@ import (
 	"log"
 )
 
-func processFile(path string, flaggerObj flagger.FlaggerInterface, writeToFile bool) {
+func processFile(path string, flaggerObj *flagger.CommonFlagger, writeToFile bool) {
 	if !strings.HasSuffix(path, ".go") {
 		return
 	}
@@ -31,7 +31,11 @@ func processFile(path string, flaggerObj flagger.FlaggerInterface, writeToFile b
 	for _, funcName := range f.Decls {
 		switch funcD := funcName.(type) {
 		case *ast.FuncDecl:
-			unFlagged = flaggerObj.CheckForFlag(funcD)
+			localFlag, updatedList := flaggerObj.RemoveFlag(funcD.Body.List)
+			if localFlag {
+				unFlagged = true
+				funcD.Body.List = updatedList
+			}
 		}
 	}
 
