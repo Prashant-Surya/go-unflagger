@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"flagger/flagger"
-	"fmt"
 	"go/printer"
 	"io/ioutil"
 	"os"
@@ -18,10 +17,6 @@ import (
 )
 
 func processFile(path string, flaggerObj *flagger.CommonFlagger, writeToFile bool) {
-	if !strings.HasSuffix(path, ".go") {
-		return
-	}
-	fmt.Println("PRINT", path)
 	fs := token.NewFileSet()
 	f, err := parser.ParseFile(fs, path, nil, parser.AllErrors)
 	if err != nil {
@@ -118,7 +113,9 @@ func main() {
 		filesList = append(filesList, filesPath)
 	}
 	for _, file := range filesList {
-		processFile(file, flaggerObj, *writeToFile)
+		if strings.HasSuffix(file, ".go") {
+			processFile(file, flaggerObj, *writeToFile)
+		}
 	}
 
 }
