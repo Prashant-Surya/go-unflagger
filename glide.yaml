@@ -1,0 +1,4 @@
+package: flagger
+import:
+- package: github.com/dave/dst
+  version: v0.23.1
