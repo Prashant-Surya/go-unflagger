@@ -1,24 +1,21 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"flagger/flagger"
-	"go/printer"
-	"io/ioutil"
+	"github.com/dave/dst/decorator"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"go/ast"
-	"go/parser"
-	"go/token"
+	ast "github.com/dave/dst"
 	"log"
 )
 
 func processFile(path string, flaggerObj *flagger.CommonFlagger, writeToFile bool) {
-	fs := token.NewFileSet()
-	f, err := parser.ParseFile(fs, path, nil, parser.AllErrors)
+	f, err := decorator.ParseFile(token.NewFileSet(), path, nil, parser.ParseComments)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,14 +33,15 @@ func processFile(path string, flaggerObj *flagger.CommonFlagger, writeToFile boo
 
 	if unFlagged {
 		if writeToFile {
-			var buf bytes.Buffer
-			printer.Fprint(&buf, token.NewFileSet(), f)
-			fileErr := ioutil.WriteFile(path, buf.Bytes(), 0644)
-			if fileErr != nil {
-				panic(fileErr)
+			fWriter, err := os.OpenFile(path, os.O_WRONLY, 0644)
+			if err != nil {
+				panic(err)
 			}
+			decorator.Fprint(fWriter, f)
 		} else {
-			printer.Fprint(os.Stdout, token.NewFileSet(), f)
+			if err := decorator.Print(f); err !=nil {
+				panic(err)
+			}
 		}
 	}
 }

@@ -2,7 +2,7 @@ package flagger
 
 import (
 	"fmt"
-	"go/ast"
+	ast "github.com/dave/dst"
 )
 
 type CommonFlagger struct {
