@@ -18,8 +18,6 @@ For this project to work with your code base use a struct with feature flags as 
 
 ### Usage:
 
-Usage of bin/flagger:
-
 Download the latest release from [https://github.com/Prashant-Surya/go-unflagger/releases](https://github.com/Prashant-Surya/go-unflagger/releases) and place it in a folder available in `$PATH`
 
 ```
@@ -53,3 +51,59 @@ flagger -path /Users/surya/go/src/testProject/main.go -type name -name launch_v1
 ```
 flagger -path /Users/surya/go/src/testProject/main.go -type date
 ```
+
+
+### How it works:
+
+When a .go file is parsed using `ast` library it returns a tree with root node containing all the statements in that file as it's children.
+
+For example the following code generates the following ast.
+
+#### Code: 
+```
+package main
+
+import (
+	"config"
+	"fmt"
+)	
+
+func main() {
+	if config.FeatureFlags.Enable {
+		fmt.Println("Enabled")
+	} else {
+		fmt.Println("Disabled")
+	}
+}
+```
+
+#### AST: 
+
+![pre](https://github.com/Prashant-Surya/go-unflagger/blob/master/resources/ast1.png)
+
+After running:
+
+```
+flagger -path /Users/surya/go/src/testProject/main.go -type name -name Enable
+```
+
+AST node of the if statement is replaced with the body of the `IF` statment. This works even when there are multiple statements under an if.
+
+
+#### Code:
+```
+package main
+
+import (
+	"config"
+	"fmt"
+)
+
+func main() {
+	fmt.Println("Enabled")
+}
+```
+
+#### AST:
+
+![post](https://github.com/Prashant-Surya/go-unflagger/blob/master/resources/ast2.png)
