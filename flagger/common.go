@@ -33,6 +33,9 @@ func(flagger *CommonFlagger) isFlag(condition ast.Expr) bool {
 }
 
 func(flagger *CommonFlagger) elseImplementation(updatedList *[]ast.Stmt, elseBlock ast.Stmt) {
+	if elseBlock == nil {
+		return
+	}
 	elseStmt := elseBlock.(*ast.BlockStmt)
 	for _, item := range elseStmt.List {
 		*updatedList = append(*updatedList, item)
