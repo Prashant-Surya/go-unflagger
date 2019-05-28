@@ -14,7 +14,7 @@ This case each feature flag is written with a separator(__) in the name and when
 
 Currently existence of flag is determined by checking if there is an `if` statement with condition similar to `<some_package>.FeatureFlags.<flag_name>`. We can make this flexible by taking the condition regex as command-line argument. 
 
-For this project to work with your code base use a struct with feature flags as the attributes.
+**NOTE: For this project to work with your code base use a struct with feature flags as the attributes.**
 
 ### Usage:
 
